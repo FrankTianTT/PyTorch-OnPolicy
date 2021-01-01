@@ -1,0 +1,2 @@
+raw/gen/time/total_timesteps,raw/gen/time/time_elapsed,raw/gen/time/fps,raw/gen/time/iterations,raw/gen/rollout/ep_rew_mean,raw/gen/rollout/ep_len_mean
+2048,26,76,1,21.29787234042553,21.29787234042553

@@ -6,10 +6,10 @@ from network.network_base import Network
 
 class CriticBase(Network):
     def __init__(self,
-                 observation_space: gym.spaces.Space,
+                 feature_dim: int,
                  network_config=None,
                  device="auto"):
-        obs_size = observation_space.shape[0]
+        obs_size = feature_dim
         if network_config is None:
             network_config = {
                 "network_sizes": [128, 128],
@@ -19,12 +19,3 @@ class CriticBase(Network):
 
     def forward(self, x):
         return super(CriticBase, self).forward(x)
-
-
-if __name__ == "__main__":
-    env = gym.make("Humanoid-v3")
-    net_conf = {
-        "network_sizes": [3, 3, 3],
-        "activation_function": ["relu", "tanh"]
-    }
-    actor = CriticBase(env.observation_space,  net_conf)

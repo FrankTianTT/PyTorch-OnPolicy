@@ -100,6 +100,9 @@ class Network(nn.Module):
     def forward(self, x):
         return self.networks(x)
 
+    def __str__(self):
+        return str(self.networks)
+
 
 if __name__ == "__main__":
     net_conf = {
@@ -107,4 +110,3 @@ if __name__ == "__main__":
         "activation_function": ["relu", "tanh"]
     }
     net = Network(net_conf, [10], 10)
-    print(net.networks)

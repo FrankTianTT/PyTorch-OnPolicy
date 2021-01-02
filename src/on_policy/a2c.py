@@ -20,10 +20,12 @@ if __name__ == '__main__':
     env = gym.make("Humanoid-v3")
     model = A2C(env)
 
-    obs = env.reset()
-    while True:
-        action = model.predict(obs)
-        obs, reward, done, info = env.step(action)
-        env.render()
-        if done:
-            obs = env.reset()
+    print(model)
+
+    # obs = env.reset()
+    # while True:
+    #     action = model.predict(obs)
+    #     obs, reward, done, info = env.step(action)
+    #     env.render()
+    #     if done:
+    #         obs = env.reset()

@@ -2,48 +2,45 @@ import gym
 from abc import ABC
 from abc import abstractmethod
 import torch
+import torch.optim as optim
 import numpy as np
+from typing import Union
+from itertools import chain
+
 from network.actor import ActorBase
 from network.critic import CriticBase
 from network.features_extractor import FeaturesExtractor
 from buffer.on_policy_buffer import OnPolicyBuffer
 from utility import get_device
-from typing import Union
+from on_policy.constant import *
 
-NETWORK_CONFIG = {
-    'features_extractor_config': {
-        "network_sizes": [128, 128],
-        "activation_function": ["relu", "relu"]
-    },
-    'feature_dim': 128,
-    'critic_network_config': {
-        "network_sizes": [128],
-        "activation_function": ["relu", "relu"]
-    },
-    'actor_network_config': {
-        "network_sizes": [128],
-        "activation_function": ["relu", "tanh"]
-    }
-}
 
 class OnPolicyBase(ABC):
     def __init__(self,
                  env: gym.Env,
                  batch_size: int = 32,
                  network_config=NETWORK_CONFIG,
+                 learning_rate_actor: float = 1e-5,
+                 learning_rate_critic: float = 1e-3,
                  gae_lambda: float = 1,
                  gamma: float = 0.99,
+                 entropy_beta: float = 1e-3,
                  device="auto",):
         self.env = env
         self.batch_size = batch_size
         self.network_config = network_config
+        self.learning_rate_actor = learning_rate_actor
+        self.learning_rate_critic = learning_rate_critic
         self.gae_lambda = gae_lambda
         self.gamma = gamma
+        self.entropy_beta = entropy_beta
         self.device = get_device(device)
 
         self.features_extractor = None
         self.actor = None
         self.critic = None
+        self.actor_optimizer = None
+        self.critic_optimizer = None
         self._last_obs = None
         self._last_dones = None
         self.buffer = None
@@ -63,6 +60,11 @@ class OnPolicyBase(ABC):
                                                     self.device)
         self.critic = CriticBase(feature_dim, critic_network_config, self.device)
         self.actor = ActorBase(feature_dim, action_space, actor_network_config, self.device)
+
+        self.actor_optimizer = optim.Adam(params=chain(self.actor.parameters(), self.features_extractor.parameters()),
+                                          lr=self.learning_rate_actor)
+        self.critic_optimizer = optim.Adam(params=chain(self.critic.parameters(), self.features_extractor.parameters()),
+                                           lr=self.learning_rate_critic)
 
     def build_buffer(self):
         self.buffer = OnPolicyBuffer(self.env, self.features_extractor, self.actor, self.critic, self.device,
@@ -85,10 +87,7 @@ class OnPolicyBase(ABC):
         while this_learn_steps < total_steps:
             this_learn_steps += self.batch_size
             self.now_steps += self.batch_size
-            self.buffer.collect(self.batch_size)
-            obss, actions, ref_values = self.buffer.get(self.batch_size)
-
-            self.train(obss, actions, ref_values)
+            self.train()
 
     def __str__(self):
         return 'features_extractor:\n{}\nactor:\n{}\ncritic\n{}'\

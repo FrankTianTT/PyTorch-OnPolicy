@@ -1,4 +1,5 @@
 import gym
+from abc import abstractmethod
 import torch
 import numpy as np
 from network.actor import ActorBase
@@ -32,8 +33,13 @@ class OnPolicyBase(object):
     def predict(self, observation):
         return self.actor_net.predict(observation)
 
+    @abstractmethod
+    def train(self):
+        pass
+
+    def learn(self):
+        pass
 
 if __name__ == '__main__':
-    # env = gym.make("Humanoid-v3")
-    # TODO
-    pass
+    env = gym.make("Humanoid-v3")
+    algro = OnPolicyBase(env)

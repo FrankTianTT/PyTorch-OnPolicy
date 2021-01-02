@@ -46,3 +46,5 @@ if __name__ == "__main__":
         action = actor.predict(obs)
         obs, reward, done, info = env.step(action)
         env.render()
+        if done:
+            obs = env.reset()

@@ -6,6 +6,7 @@ import numpy as np
 from network.actor import ActorBase
 from network.critic import CriticBase
 from network.features_extractor import FeaturesExtractor
+from buffer.on_policy_buffer import OnPolicyBuffer
 from typing import Union
 
 NETWORK_CONFIG = {
@@ -29,10 +30,16 @@ class OnPolicyBase(ABC):
                  env: gym.Env,
                  n_steps: int = 2048,
                  network_config=NETWORK_CONFIG,
+                 buffer_size=1000,
+                 gae_lambda: float = 1,
+                 gamma: float = 0.99,
                  device="auto",):
         self.env = env
         self.n_steps = n_steps
         self.network_config = network_config
+        self.buffer_size = buffer_size
+        self.gae_lambda = gae_lambda
+        self.gamma = gamma
         self.device = self.get_device(device)
 
         self.features_extractor = None
@@ -40,11 +47,11 @@ class OnPolicyBase(ABC):
         self.critic = None
         self._last_obs = None
         self._last_dones = None
-
+        self.buffer = OnPolicyBuffer(self.buffer_size, self.env.observation_space, self.env.action_space,
+                                     device=self.device, gae_lambda=self.gae_lambda, gamma=self.gamma)
         self.num_timesteps = 0
 
         self.build_network(self.network_config)
-        # TODO
 
     def build_network(self, network_config):
         features_extractor_config = network_config['features_extractor_config']
@@ -86,7 +93,7 @@ class OnPolicyBase(ABC):
 
             new_obs, rewards, dones, infos = env.step(actions)
 
-            self.num_timesteps += env.num_envs
+            self.num_timesteps += 1
             n_steps += 1
 
             if isinstance(self.env.action_space, gym.spaces.Discrete):
@@ -96,7 +103,7 @@ class OnPolicyBase(ABC):
             self._last_dones = dones
 
         with torch.no_grad():
-            # Compute value for the last timestep
+            # Compute value for the last time-step
             obs_tensor = torch.as_tensor(new_obs).to(self.device)
             values = self.critic(self.features_extractor(obs_tensor))
 
@@ -118,10 +125,11 @@ class OnPolicyBase(ABC):
 
     @abstractmethod
     def train(self):
+
         pass
 
     def learn(self):
-        pass
+        self.collect_rollouts(self.env, self.buffer, 1024)
 
     def __str__(self):
         return 'features_extractor:\n{}\nactor:\n{}\ncritic\n{}'\

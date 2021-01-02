@@ -9,7 +9,7 @@ class OnPolicyBuffer(Buffer):
                  device="auto",
                  gae_lambda: float = 1,
                  gamma: float = 0.99):
-        super(Buffer).__init__(buffer_size,
+        super(OnPolicyBuffer, self).__init__(buffer_size,
                                observation_space,
                                action_space,
                                device)
@@ -18,6 +18,9 @@ class OnPolicyBuffer(Buffer):
         pass
 
     def get(self, batch_size: int):
+        pass
+
+    def compute_returns_and_advantage(self, last_values, dones):
         pass
 
 

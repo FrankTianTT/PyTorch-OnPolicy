@@ -15,6 +15,9 @@ class Buffer(ABC):
     def reset(self):
         pass
 
+    def add(self):
+        pass
+
 
 if __name__ == '__main__':
     pass

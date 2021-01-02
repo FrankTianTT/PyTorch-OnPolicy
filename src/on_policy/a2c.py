@@ -20,7 +20,7 @@ if __name__ == '__main__':
     env = gym.make("Humanoid-v3")
     model = A2C(env)
 
-    print(model)
+    model.learn()
 
     # obs = env.reset()
     # while True:

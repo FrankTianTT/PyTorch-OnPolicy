@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from typing import Union
+from utility import get_device
 
 class Network(nn.Module):
     def __init__(self,
@@ -10,7 +10,7 @@ class Network(nn.Module):
                  output_size,
                  device="auto"):
         super(Network, self).__init__()
-        self.device = self.get_device(device)
+        self.device = get_device(device)
 
         if type(input_size) is int:
             sample_input = torch.rand(1, input_size)
@@ -48,20 +48,6 @@ class Network(nn.Module):
             raise NotImplementedError("activation function {} not implemented.".format(name))
 
         return activation_fn
-
-    @staticmethod
-    def get_device(device: Union[torch.device, str] = "auto") -> torch.device:
-        # Cuda by default
-        if device == "auto":
-            device = "cuda"
-        # Force conversion to th.device
-        device = torch.device(device)
-
-        # Cuda not available
-        if device.type == torch.device("cuda").type and not torch.cuda.is_available():
-            return torch.device("cpu")
-
-        return device
 
     def construct_networks(self, network_config, sample_input, out_size):
         networks_list = []

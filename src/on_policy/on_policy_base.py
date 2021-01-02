@@ -29,7 +29,7 @@ NETWORK_CONFIG = {
 class OnPolicyBase(ABC):
     def __init__(self,
                  env: gym.Env,
-                 batch_size: int,
+                 batch_size: int = 32,
                  network_config=NETWORK_CONFIG,
                  gae_lambda: float = 1,
                  gamma: float = 0.99,
@@ -47,7 +47,7 @@ class OnPolicyBase(ABC):
         self._last_obs = None
         self._last_dones = None
         self.buffer = None
-        self.num_timesteps = 0
+        self.now_steps = 0
 
         self.build_network()
         self.build_buffer()
@@ -80,11 +80,15 @@ class OnPolicyBase(ABC):
     def train(self):
         raise NotImplementedError
 
-    def learn(self):
-        self.buffer.collect(self.batch_size)
-        data = self.buffer.get(self.batch_size)
+    def learn(self, total_steps):
+        this_learn_steps = 0
+        while this_learn_steps < total_steps:
+            this_learn_steps += self.batch_size
+            self.now_steps += self.batch_size
+            self.buffer.collect(self.batch_size)
+            obss, actions, ref_values = self.buffer.get(self.batch_size)
 
-
+            self.train(obss, actions, ref_values)
 
     def __str__(self):
         return 'features_extractor:\n{}\nactor:\n{}\ncritic\n{}'\

@@ -94,7 +94,7 @@ class OnPolicyBuffer(object):
         not_dones_np = np.array(self.not_dones[-batch:])
         values_np = np.array(self.values[-batch:])
         ref_values = rewards_np
-        ref_values[not_dones_np] += values_np[not_dones_np] * self.gamma
+        ref_values[not_dones_np] = ref_values[not_dones_np] + values_np[not_dones_np] * self.gamma
         last_obss_np = np.array(self.last_obss[-batch:])
         actions_np = np.array(self.actions[-batch:])
         return torch.from_numpy(last_obss_np).to(torch.float32).to(self.device), \

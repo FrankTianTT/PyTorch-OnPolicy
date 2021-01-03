@@ -6,7 +6,7 @@ NETWORK_CONFIG = {
     'feature_dim': 128,
     'critic_network_config': {
         "network_sizes": [128],
-        "activation_function": ["relu", "relu"]
+        "activation_function": ["relu", "identity"]
     },
     'actor_network_config': {
         "network_sizes": [128],

@@ -43,25 +43,33 @@ class A2C(OnPolicyBase):
 
         self.critic_optimizer.zero_grad()
         obs_values = self.critic(self.features_extractor(obss))
-        loss_value = F.mse_loss(obs_values.squeeze(-1), ref_values)
-        loss_value.backward()
+        value_lass = F.mse_loss(obs_values.squeeze(-1), ref_values)
+        value_lass.backward()
         self.critic_optimizer.step()
 
         self.actor_optimizer.zero_grad()
         mu = self.actor(self.features_extractor(obss))
         advantage = ref_values.unsqueeze(dim=-1) - obs_values.detach()
-        log_prob_v = advantage * self.calc_logprob(mu, self.actor.logstd, actions)
-        loss_policy_v = -log_prob_v.mean()
-        entropy_loss_v = self.entropy_beta * (-(torch.log(2 * np.pi * torch.exp(self.actor.logstd)) + 1) / 2).mean()
-        loss_v = loss_policy_v + entropy_loss_v
-        loss_v.backward()
+        log_prob = advantage * self.calc_logprob(mu, self.actor.log_std, actions)
+        policy_loss = -log_prob.mean()
+        entropy_loss = self.entropy_beta * (-(torch.log(2 * np.pi * torch.exp(self.actor.log_std)) + 1) / 2).mean()
+        actor_total_loss = policy_loss + entropy_loss
+        actor_total_loss.backward()
         self.actor_optimizer.step()
+
+        self.logger.log_var('train/advantage', advantage, self.now_steps)
+        self.logger.log_var('train/obs_value', obs_values, self.now_steps)
+        self.logger.log_var('train/ref_values', ref_values, self.now_steps)
+        self.logger.log_var('train/entropy_loss', entropy_loss, self.now_steps)
+        self.logger.log_var('train/policy_loss', policy_loss, self.now_steps)
+        self.logger.log_var('train/value_lass', value_lass, self.now_steps)
+        self.logger.log_var('train/actor_total_loss', actor_total_loss, self.now_steps)
 
 if __name__ == '__main__':
     env = gym.make("Humanoid-v3")
     model = A2C(env)
 
-    model.learn()
+    model.learn(1000)
 
     # obs = env.reset()
     # while True:

@@ -74,9 +74,9 @@ class OnPolicyBuffer(object):
         ref_values[not_dones_np] += values_np[not_dones_np] * self.gamma
         last_obss_np = np.array(self.last_obss[-batch:])
         actions_np = np.array(self.actions[-batch:])
-        return torch.from_numpy(last_obss_np).to(self.device), \
-               torch.from_numpy(actions_np).to(self.device), \
-               torch.from_numpy(ref_values).to(self.device)
+        return torch.from_numpy(last_obss_np).to(torch.float32).to(self.device), \
+               torch.from_numpy(actions_np).to(torch.float32).to(self.device), \
+               torch.from_numpy(ref_values).to(torch.float32).to(self.device)
 
 if __name__ == '__main__':
     pass

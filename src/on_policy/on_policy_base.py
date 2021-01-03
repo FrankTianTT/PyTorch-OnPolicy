@@ -13,7 +13,7 @@ from network.features_extractor import FeaturesExtractor
 from buffer.on_policy_buffer import OnPolicyBuffer
 from utility import get_device
 from on_policy.constant import *
-
+from logger import Logger
 
 class OnPolicyBase(ABC):
     def __init__(self,
@@ -25,6 +25,7 @@ class OnPolicyBase(ABC):
                  gae_lambda: float = 1,
                  gamma: float = 0.99,
                  entropy_beta: float = 1e-3,
+                 tb_path: str = '',
                  device="auto",):
         self.env = env
         self.batch_size = batch_size
@@ -34,6 +35,7 @@ class OnPolicyBase(ABC):
         self.gae_lambda = gae_lambda
         self.gamma = gamma
         self.entropy_beta = entropy_beta
+        self.tb_path = tb_path
         self.device = get_device(device)
 
         self.features_extractor = None
@@ -48,6 +50,7 @@ class OnPolicyBase(ABC):
 
         self.build_network()
         self.build_buffer()
+        self.logger = Logger()
 
     def build_network(self):
         features_extractor_config = self.network_config['features_extractor_config']

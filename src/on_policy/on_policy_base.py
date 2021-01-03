@@ -25,7 +25,9 @@ class OnPolicyBase(ABC):
                  gae_lambda: float = 1,
                  gamma: float = 0.99,
                  entropy_beta: float = 1e-3,
-                 tb_path: str = '',
+                 log_path: str = '',
+                 log_prefix: str = 'on-policy',
+                 log_freq: int = 50,
                  device="auto",):
         self.env = env
         self.batch_size = batch_size
@@ -35,7 +37,9 @@ class OnPolicyBase(ABC):
         self.gae_lambda = gae_lambda
         self.gamma = gamma
         self.entropy_beta = entropy_beta
-        self.tb_path = tb_path
+        self.log_path = log_path
+        self.log_prefix = log_prefix
+        self.log_freq = log_freq
         self.device = get_device(device)
 
         self.features_extractor = None
@@ -50,7 +54,7 @@ class OnPolicyBase(ABC):
 
         self.build_network()
         self.build_buffer()
-        self.logger = Logger()
+        self.logger = Logger(self.log_path, prefix=self.log_prefix, log_freq=self.log_freq)
 
     def build_network(self):
         features_extractor_config = self.network_config['features_extractor_config']

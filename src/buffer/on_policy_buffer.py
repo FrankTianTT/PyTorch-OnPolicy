@@ -22,11 +22,13 @@ class OnPolicyBuffer(object):
         self.gamma = gamma
 
         self._last_obs = env.reset()
+        # reward and steps of one rollout
+        self.sum_reward = 0
+        self.sum_steps = 0
         self._last_dones = None
         self.exp_buffer = list()
-        pass
 
-    def collect(self, batch):
+    def collect(self, batch, now_steps, logger):
         assert self._last_obs is not None, "No previous observation was provided"
         self.last_obss = []
         self.actions = []
@@ -49,6 +51,8 @@ class OnPolicyBuffer(object):
             action = action.cpu().numpy()
             action = np.clip(action, self.env.action_space.low, self.env.action_space.high)
             new_obs, reward, done, info = self.env.step(action)
+            self.sum_reward += reward
+            self.sum_steps += 1
 
             self.last_obss.append(self._last_obs)
             self.values.append(value)
@@ -58,6 +62,13 @@ class OnPolicyBuffer(object):
             self.new_obss.append(new_obs)
 
             self._last_obs = new_obs
+
+            if done:
+                self._last_obs = self.env.reset()
+                logger.log_var('run/steps', self.sum_steps, now_steps + n_steps)
+                logger.log_var('run/reward', self.sum_reward, now_steps + n_steps)
+                self.sum_reward = 0
+                self.sum_steps = 0
 
         self.values.pop(0)
         with torch.no_grad():

@@ -17,6 +17,9 @@ class A2C(OnPolicyBase):
                 gae_lambda: float = 1,
                 gamma: float = 0.99,
                 entropy_beta: float = 1e-3,
+                log_path: str = '',
+                log_prefix: str = 'a2c',
+                log_freq: int = 50,
                 device="auto",):
         super(A2C, self).__init__(env,
                                   batch_size,
@@ -26,6 +29,9 @@ class A2C(OnPolicyBase):
                                   gae_lambda,
                                   gamma,
                                   entropy_beta,
+                                  log_path,
+                                  log_prefix,
+                                  log_freq,
                                   device)
 
     def learn(self, total_steps):
@@ -38,7 +44,7 @@ class A2C(OnPolicyBase):
         return p1 + p2
 
     def train(self):
-        self.buffer.collect(self.batch_size)
+        self.buffer.collect(self.batch_size, self.now_steps, self.logger)
         obss, actions, ref_values = self.buffer.get(self.batch_size)
 
         self.critic_optimizer.zero_grad()
@@ -57,13 +63,13 @@ class A2C(OnPolicyBase):
         actor_total_loss.backward()
         self.actor_optimizer.step()
 
-        self.logger.log_var('train/advantage', advantage, self.now_steps)
-        self.logger.log_var('train/obs_value', obs_values, self.now_steps)
-        self.logger.log_var('train/ref_values', ref_values, self.now_steps)
-        self.logger.log_var('train/entropy_loss', entropy_loss, self.now_steps)
-        self.logger.log_var('train/policy_loss', policy_loss, self.now_steps)
-        self.logger.log_var('train/value_lass', value_lass, self.now_steps)
-        self.logger.log_var('train/actor_total_loss', actor_total_loss, self.now_steps)
+        self.logger.track('train/advantage', advantage, self.now_steps)
+        self.logger.track('train/obs_value', obs_values, self.now_steps)
+        self.logger.track('train/ref_values', ref_values, self.now_steps)
+        self.logger.track('loss/entropy_loss', entropy_loss, self.now_steps)
+        self.logger.track('loss/policy_loss', policy_loss, self.now_steps)
+        self.logger.track('loss/value_lass', value_lass, self.now_steps)
+        self.logger.track('loss/actor_total_loss', actor_total_loss, self.now_steps)
 
 if __name__ == '__main__':
     env = gym.make("Humanoid-v3")

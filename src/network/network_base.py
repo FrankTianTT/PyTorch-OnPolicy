@@ -19,6 +19,7 @@ class Network(nn.Module):
 
         self.networks = nn.Sequential(*self.construct_networks(network_config, sample_input, output_size)).\
             to(self.device)
+        self.xavier_initiate(self.networks)
 
     @staticmethod
     def get_network(param, is_conv=False):
@@ -85,6 +86,11 @@ class Network(nn.Module):
 
     def forward(self, x):
         return self.networks(x)
+
+    def xavier_initiate(self, network):
+        for m in network:
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
+                nn.init.xavier_uniform_(m.weight)
 
     def __str__(self):
         return str(self.networks)

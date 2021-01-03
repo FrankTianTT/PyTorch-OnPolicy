@@ -44,15 +44,21 @@ class A2C(OnPolicyBase):
         return p1 + p2
 
     def train(self):
+        """
+        "train" function for A2C algorithm, which should be a part of "learn" function
+        :return: none
+        """
         self.buffer.collect(self.batch_size, self.now_steps, self.logger)
         obss, actions, ref_values = self.buffer.get(self.batch_size)
 
+        # train for critic
         self.critic_optimizer.zero_grad()
         obs_values = self.critic(self.features_extractor(obss))
         value_lass = F.mse_loss(obs_values.squeeze(-1), ref_values)
         value_lass.backward()
         self.critic_optimizer.step()
 
+        # train for actor
         self.actor_optimizer.zero_grad()
         mu = self.actor(self.features_extractor(obss))
         advantage = ref_values.unsqueeze(dim=-1) - obs_values.detach()

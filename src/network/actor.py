@@ -22,7 +22,7 @@ class ActorBase(Network):
                 "activation_function": ["relu", "tanh"]
             }
         super(ActorBase, self).__init__(network_config, feature_dim, act_size, device)
-        self.log_std = nn.Parameter(torch.zeros(act_size)).to(self.device)
+        self.log_std = nn.Parameter(torch.randn(act_size)).to(self.device)
 
     def forward(self, x):
         return super(ActorBase, self).forward(x)

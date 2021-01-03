@@ -41,6 +41,13 @@ class OnPolicyBuffer(object):
 
 
     def collect(self, batch, now_steps, logger):
+        """
+        collect a batch of data from gym-env.
+        :param batch: batch-size of data
+        :param now_steps: use for log
+        :param logger: logger object
+        :return: none
+        """
         assert self._last_obs is not None, "No previous observation was provided"
         self.last_obss = []
         self.actions = []
@@ -66,10 +73,14 @@ class OnPolicyBuffer(object):
             else:
                 raise TypeError
             new_obs, reward, done, info = self.env.step(action)
+
+            # render env, use for debug
+            # self.env.render()
             self.sum_reward += reward
             self.sum_steps += 1
 
             self.last_obss.append(self._last_obs)
+            # values are dislocation, however will be repaired latter.
             self.values.append(value)
             self.actions.append(action)
             self.rewards.append(reward)
@@ -85,11 +96,13 @@ class OnPolicyBuffer(object):
                 self.sum_reward = 0
                 self.sum_steps = 0
 
+        # delete the first element of values, it is the value of first "last_obs", while we need value of "new_obs"
         self.values.pop(0)
         with torch.no_grad():
             obs_tensor = torch.as_tensor(self._last_obs).to(self.device).to(torch.float32)
             feature = self.features_extractor(obs_tensor)
             value = self.critic(feature)
+        # add the value of the last "new_obs"
         self.values.append(value)
 
     def get(self, batch):

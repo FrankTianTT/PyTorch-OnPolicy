@@ -1,6 +1,6 @@
 NETWORK_CONFIG = {
     'features_extractor_config': {
-        "network_sizes": [128, 128],
+        "network_sizes": [128],
         "activation_function": ["relu", "relu"]
     },
     'feature_dim': 128,

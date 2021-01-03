@@ -6,8 +6,8 @@ sys.path.append(SAC_PATH)
 from on_policy.a2c import A2C
 import gym
 
-env = gym.make("HalfCheetah-v3")
-model = A2C(env, log_path='log')
+env = gym.make("LunarLanderContinuous-v2")
+model = A2C(env, log_path='log', log_freq=500)
 
 if __name__ == "__main__":
     model.learn(1000000)

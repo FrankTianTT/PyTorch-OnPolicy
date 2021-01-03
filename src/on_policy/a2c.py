@@ -26,13 +26,13 @@ class A2C(OnPolicyBase):
                                   network_config,
                                   learning_rate_actor,
                                   learning_rate_critic,
-                                  gae_lambda,
-                                  gamma,
-                                  entropy_beta,
-                                  log_path,
-                                  log_prefix,
-                                  log_freq,
-                                  device)
+                                  gae_lambda=gae_lambda,
+                                  gamma=gamma,
+                                  entropy_beta=entropy_beta,
+                                  log_path=log_path,
+                                  log_prefix=log_prefix,
+                                  log_freq=log_freq,
+                                  device=device)
 
     def learn(self, total_steps):
         super(A2C, self).learn(total_steps)

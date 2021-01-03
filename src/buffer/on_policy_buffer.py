@@ -61,7 +61,10 @@ class OnPolicyBuffer(object):
                 value = self.critic(feature)
 
             action = action.cpu().numpy()
-            action = self.tanh2bound(action, self.env.action_space.low, self.env.action_space.high)
+            if isinstance(self.env.action_space, gym.spaces.Box):
+                action = self.tanh2bound(action, self.env.action_space.low, self.env.action_space.high)
+            else:
+                raise TypeError
             new_obs, reward, done, info = self.env.step(action)
             self.sum_reward += reward
             self.sum_steps += 1

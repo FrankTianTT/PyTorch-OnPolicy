@@ -12,7 +12,10 @@ class ActorBase(Network):
                  action_space: gym.spaces.Space,
                  network_config=None,
                  device="auto"):
-        act_size = action_space.shape[0]
+        if isinstance(action_space, gym.spaces.Box):
+            act_size = action_space.shape[0]
+        else:
+            raise TypeError
         if network_config is None:
             network_config = {
                 "network_sizes": [128, 128],

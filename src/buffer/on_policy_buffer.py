@@ -28,6 +28,18 @@ class OnPolicyBuffer(object):
         self._last_dones = None
         self.exp_buffer = list()
 
+    @staticmethod
+    def tanh2bound(action: float, low, high):
+        """
+        transfer action from [-1, 1] to [low, high]
+        :param action: action get from actor network
+        :param low: env action-space low bound
+        :param high: env action-space high bound
+        :return: new action
+        """
+        return (action / 2) * (high - low) + (high + low) / 2
+
+
     def collect(self, batch, now_steps, logger):
         assert self._last_obs is not None, "No previous observation was provided"
         self.last_obss = []
@@ -49,7 +61,7 @@ class OnPolicyBuffer(object):
                 value = self.critic(feature)
 
             action = action.cpu().numpy()
-            action = np.clip(action, self.env.action_space.low, self.env.action_space.high)
+            action = self.tanh2bound(action, self.env.action_space.low, self.env.action_space.high)
             new_obs, reward, done, info = self.env.step(action)
             self.sum_reward += reward
             self.sum_steps += 1

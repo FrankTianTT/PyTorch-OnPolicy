@@ -1,3 +1,8 @@
+import os
+import sys
+SAC_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
+sys.path.append(SAC_PATH)
+
 from on_policy.a2c import A2C
 import gym
 

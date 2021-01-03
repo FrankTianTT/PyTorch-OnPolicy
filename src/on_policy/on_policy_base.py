@@ -67,7 +67,7 @@ class OnPolicyBase(ABC):
 
     def build_buffer(self):
         self.buffer = OnPolicyBuffer(self.env, self.actor, self.critic, self.device,
-                                     self.gae_lambda, self.gamma)
+                                     reward_step=5, gae_lambda=self.gae_lambda, gamma=self.gamma)
 
     def predict(self, observation):
         with torch.no_grad():

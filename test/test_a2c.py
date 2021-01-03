@@ -7,7 +7,7 @@ from on_policy.a2c import A2C
 import gym
 
 env = gym.make("LunarLanderContinuous-v2")
-model = A2C(env, log_path='log', log_freq=50)
+model = A2C(env, log_path='log', log_freq=50, device='cpu')
 
 if __name__ == "__main__":
     model.learn(1000000)

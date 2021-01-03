@@ -49,8 +49,7 @@ class A2C(OnPolicyBase):
         "train" function for A2C algorithm, which should be a part of "learn" function
         :return: none
         """
-        self.buffer.collect(self.batch_size, self.now_steps, self.logger)
-        obss, actions, ref_values = self.buffer.get(self.batch_size)
+        obss, actions, ref_values = self.buffer.collect(self.batch_size, self.now_steps, self.logger)
 
         # train for critic
         self.critic_optimizer.zero_grad()

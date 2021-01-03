@@ -4,6 +4,8 @@ import gym
 import torch
 import torch.nn as nn
 from network.network_base import Network
+from utility import get_device
+
 
 
 class ActorBase(nn.Module):
@@ -13,6 +15,8 @@ class ActorBase(nn.Module):
                  network_config=None,
                  device="auto"):
         super(ActorBase, self).__init__()
+
+        self.device = get_device(device)
         obs_size = observation_space.shape[0]
         if isinstance(action_space, gym.spaces.Box):
             act_size = action_space.shape[0]
@@ -26,8 +30,8 @@ class ActorBase(nn.Module):
             nn.Tanh(),
             nn.Linear(64, act_size),
             nn.Tanh(),
-        )
-        self.log_std = nn.Parameter(torch.zeros(act_size))
+        ).to(self.device)
+        self.log_std = nn.Parameter(torch.zeros(act_size)).to(self.device)
         # if network_config is None:
         #     network_config = {
         #         "network_sizes": [128, 128],

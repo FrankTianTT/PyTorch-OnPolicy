@@ -7,14 +7,12 @@ from utility import get_device
 class OnPolicyBuffer(object):
     def __init__(self,
                  env: gym.Env,
-                 features_extractor,
                  actor,
                  critic,
                  device="auto",
                  gae_lambda: float = 1,
                  gamma: float = 0.99):
         self.env = env
-        self.features_extractor = features_extractor
         self.actor = actor
         self.critic = critic
         self.device = get_device(device)
@@ -63,9 +61,8 @@ class OnPolicyBuffer(object):
             with torch.no_grad():
                 # Convert to pytorch tensor
                 obs_tensor = torch.as_tensor(self._last_obs).to(self.device).to(torch.float32)
-                feature = self.features_extractor(obs_tensor)
-                action = self.actor(feature)
-                value = self.critic(feature)
+                action = self.actor(obs_tensor)
+                value = self.critic(obs_tensor)
 
             action = action.cpu().numpy()
             if isinstance(self.env.action_space, gym.spaces.Box):
@@ -100,8 +97,7 @@ class OnPolicyBuffer(object):
         self.values.pop(0)
         with torch.no_grad():
             obs_tensor = torch.as_tensor(self._last_obs).to(self.device).to(torch.float32)
-            feature = self.features_extractor(obs_tensor)
-            value = self.critic(feature)
+            value = self.critic(obs_tensor)
         # add the value of the last "new_obs"
         self.values.append(value)
 

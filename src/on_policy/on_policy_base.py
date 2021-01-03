@@ -9,7 +9,6 @@ from itertools import chain
 
 from network.actor import ActorBase
 from network.critic import CriticBase
-from network.features_extractor import FeaturesExtractor
 from buffer.on_policy_buffer import OnPolicyBuffer
 from utility import get_device
 from on_policy.constant import *
@@ -57,31 +56,23 @@ class OnPolicyBase(ABC):
         self.logger = Logger(self.log_path, prefix=self.log_prefix, log_freq=self.log_freq)
 
     def build_network(self):
-        features_extractor_config = self.network_config['features_extractor_config']
-        feature_dim = self.network_config['feature_dim']
         critic_network_config = self.network_config['critic_network_config']
         actor_network_config = self.network_config['actor_network_config']
         observation_space = self.env.observation_space
         action_space = self.env.action_space
-        self.features_extractor = FeaturesExtractor(observation_space, feature_dim, features_extractor_config,
-                                                    self.device)
-        self.critic = CriticBase(feature_dim, critic_network_config, self.device)
-        self.actor = ActorBase(feature_dim, action_space, actor_network_config, self.device)
-
-        self.actor_optimizer = optim.Adam(params=chain(self.actor.parameters(), self.features_extractor.parameters()),
-                                          lr=self.learning_rate_actor)
-        self.critic_optimizer = optim.Adam(params=chain(self.critic.parameters(), self.features_extractor.parameters()),
-                                           lr=self.learning_rate_critic)
+        self.critic = CriticBase(observation_space, critic_network_config, self.device)
+        self.actor = ActorBase(observation_space, action_space, actor_network_config, self.device)
+        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=self.learning_rate_actor)
+        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=self.learning_rate_critic)
 
     def build_buffer(self):
-        self.buffer = OnPolicyBuffer(self.env, self.features_extractor, self.actor, self.critic, self.device,
+        self.buffer = OnPolicyBuffer(self.env, self.actor, self.critic, self.device,
                                      self.gae_lambda, self.gamma)
 
     def predict(self, observation):
         with torch.no_grad():
             observation = torch.as_tensor(observation).to(self.device).to(torch.float32)
-            feature = self.features_extractor(observation)
-            action = self.actor(feature)
+            action = self.actor(observation)
         action = action.cpu().numpy()
         return action
 
@@ -97,8 +88,8 @@ class OnPolicyBase(ABC):
             self.train()
 
     def __str__(self):
-        return 'features_extractor:\n{}\nactor:\n{}\ncritic\n{}'\
-            .format(str(self.features_extractor), str(self.actor), str(self.critic))
+        return 'actor:\n{}\ncritic\n{}'\
+            .format(str(self.actor), str(self.critic))
 
 if __name__ == '__main__':
     env = gym.make("Humanoid-v3")

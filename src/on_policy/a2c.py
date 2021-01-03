@@ -54,16 +54,14 @@ class A2C(OnPolicyBase):
 
         # train for critic
         self.critic_optimizer.zero_grad()
-        features = self.features_extractor(obss)
-        obs_values = self.critic(features)
+        obs_values = self.critic(obss)
         value_lass = F.mse_loss(obs_values.squeeze(-1), ref_values)
         value_lass.backward()
         self.critic_optimizer.step()
 
         # train for actor
         self.actor_optimizer.zero_grad()
-        features = self.features_extractor(obss)
-        mu = self.actor(features)
+        mu = self.actor(obss)
         advantage = ref_values.unsqueeze(dim=-1) - obs_values.detach()
         # calculate pi(action|mu, std), pi is a gaussian distribution
         log_prob = advantage * self.calc_logprob(mu, self.actor.log_std, actions)

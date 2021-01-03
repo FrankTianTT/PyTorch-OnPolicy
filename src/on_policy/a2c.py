@@ -63,13 +63,14 @@ class A2C(OnPolicyBase):
         actor_total_loss.backward()
         self.actor_optimizer.step()
 
-        self.logger.track('train/advantage', advantage, self.now_steps)
-        self.logger.track('train/obs_value', obs_values, self.now_steps)
-        self.logger.track('train/ref_values', ref_values, self.now_steps)
-        self.logger.track('loss/entropy_loss', entropy_loss, self.now_steps)
-        self.logger.track('loss/policy_loss', policy_loss, self.now_steps)
-        self.logger.track('loss/value_lass', value_lass, self.now_steps)
-        self.logger.track('loss/actor_total_loss', actor_total_loss, self.now_steps)
+        self.logger.track('train/advantage', advantage)
+        self.logger.track('train/obs_value', obs_values)
+        self.logger.track('train/ref_values', ref_values)
+        self.logger.track('loss/entropy_loss', entropy_loss)
+        self.logger.track('loss/policy_loss', policy_loss)
+        self.logger.track('loss/value_lass', value_lass)
+        self.logger.track('loss/actor_total_loss', actor_total_loss)
+        self.logger.write(self.now_steps)
 
 if __name__ == '__main__':
     env = gym.make("Humanoid-v3")

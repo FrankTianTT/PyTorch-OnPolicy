@@ -44,12 +44,31 @@ class Logger(object):
     def log_var(self, name, val, index):
         self.tb_writer.add_scalar(name, val, index)
 
-    def track(self, name, val, index):
-        self.log_counter += 1
+    def track(self, name, val):
         val = val.detach().sum()
         self.value_buffer[name].append(val)
 
+    def write(self, index):
+        self.log_counter += 1
         if self.log_counter % self.log_freq == 0:
+            for name in self.value_buffer.keys():
+                value = sum(self.value_buffer[name]) / len(self.value_buffer[name])
+                self.log_var(name, value, index)
+
+            table = self.get_table()
+            self.log_str(table)
+            for name in self.value_buffer.keys():
+                self.value_buffer[name].clear()
+
+    def get_table(self):
+        table = defaultdict(defaultdict)
+        for name in self.value_buffer.keys():
             value = sum(self.value_buffer[name]) / len(self.value_buffer[name])
-            self.log_var(name, value, index)
-            self.value_buffer[name].clear()
+            category, info = name.split('/')
+            table[category][info] = value
+        table_str = '\n'
+        for category in table.keys():
+            table_str += '{}: \n'.format(category)
+            for info in table[category].keys():
+                table_str += '\t{}\t{}\n'.format(info, float(table[category][info]))
+        return table_str

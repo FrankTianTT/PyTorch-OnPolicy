@@ -61,7 +61,7 @@ class OnPolicyBuffer(object):
             with torch.no_grad():
                 # Convert to pytorch tensor
                 obs_tensor = torch.as_tensor(self._last_obs).to(self.device).to(torch.float32)
-                action = self.actor(obs_tensor)
+                action, _ = self.actor(obs_tensor)
                 value = self.critic(obs_tensor)
 
             action = action.cpu().numpy()

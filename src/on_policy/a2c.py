@@ -39,9 +39,9 @@ class A2C(OnPolicyBase):
         super(A2C, self).learn(total_steps)
 
     @staticmethod
-    def calc_logprob(mu, log_std, actions):
-        p1 = - torch.pow(mu - actions, 2) / (2 * torch.pow(torch.exp(log_std), 2).clamp(min=1e-3))
-        p2 = - math.log(math.sqrt(2 * math.pi)) - log_std
+    def calc_logprob(mu, log_var, actions):
+        p1 = - torch.pow(mu - actions, 2) / (2 * torch.exp(log_var).clamp(min=1e-3))
+        p2 = - torch.log(torch.sqrt(2 * math.pi * torch.exp(log_var)))
         return p1 + p2
 
     def train(self):
@@ -61,13 +61,13 @@ class A2C(OnPolicyBase):
 
         # train for actor
         self.actor_optimizer.zero_grad()
-        mu = self.actor(obss)
+        mu, log_var = self.actor(obss)
         advantage = ref_values.unsqueeze(dim=-1) - obs_values.detach()
         # calculate pi(action|mu, std), pi is a gaussian distribution
-        log_prob = advantage * self.calc_logprob(mu, self.actor.log_std, actions)
+        log_prob = advantage * self.calc_logprob(mu, log_var, actions)
         policy_loss = - log_prob.mean()
         # entropy = (log(2 * pi * sigma ** 2) + 1)/2
-        entropy_loss = self.entropy_beta * (-(torch.log(2 * np.pi * torch.pow(torch.exp(self.actor.log_std), 2)) + 1)/2).mean()
+        entropy_loss = self.entropy_beta * (-(torch.log(2 * np.pi * torch.exp(log_var)) + 1) / 2).mean()
         actor_total_loss = policy_loss + entropy_loss
         actor_total_loss.backward()
         self.actor_optimizer.step()

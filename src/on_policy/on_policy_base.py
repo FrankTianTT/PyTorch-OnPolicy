@@ -72,7 +72,7 @@ class OnPolicyBase(ABC):
     def predict(self, observation):
         with torch.no_grad():
             observation = torch.as_tensor(observation).to(self.device).to(torch.float32)
-            action = self.actor(observation)
+            action, _ = self.actor(observation)
         action = action.cpu().numpy()
         return action
 

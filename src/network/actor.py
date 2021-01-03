@@ -23,15 +23,19 @@ class ActorBase(nn.Module):
         else:
             raise NotImplemented
 
-        self.mu = nn.Sequential(
+        self.hidden = nn.Sequential(
             nn.Linear(obs_size, 64),
             nn.Tanh(),
             nn.Linear(64, 64),
             nn.Tanh(),
+        ).to(self.device)
+        self.mu = nn.Sequential(
             nn.Linear(64, act_size),
             nn.Tanh(),
         ).to(self.device)
-        self.log_std = nn.Parameter(torch.zeros(act_size)).to(self.device)
+        self.log_var = nn.Sequential(
+            nn.Linear(64, 1),
+        ).to(self.device)
         # if network_config is None:
         #     network_config = {
         #         "network_sizes": [128, 128],
@@ -41,7 +45,7 @@ class ActorBase(nn.Module):
         # self.log_std = nn.Parameter(torch.randn(act_size)).to(self.device)
 
     def forward(self, x):
-        return self.mu(x)
+        return self.mu(self.hidden(x)), self.log_var(self.hidden(x))
 
     #
     # def log_std(self):

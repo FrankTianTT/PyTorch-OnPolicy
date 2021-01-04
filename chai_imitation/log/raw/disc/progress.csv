@@ -1,3 +1,0 @@
-raw/disc/disc_proportion_expert_pred,raw/disc/disc_entropy,raw/disc/disc_proportion_expert_true,raw/disc/n_generated,raw/disc/disc_acc_expert,raw/disc/disc_acc,raw/disc/disc_loss,raw/disc/global_step,raw/disc/disc_acc_gen,raw/disc/n_expert
-1.0,-5.672050476074219,0.5,32.0,1.0,0.5,0.6921008825302124,1,0.0,32.0
-1.0,-5.735401153564453,0.5,32.0,1.0,0.5,0.6876999139785767,1,0.0,32.0

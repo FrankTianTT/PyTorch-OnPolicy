@@ -11,7 +11,7 @@ from network.actor import ActorBase
 from network.critic import CriticBase
 from buffer.on_policy_buffer import OnPolicyBuffer
 from utility import get_device
-from on_policy.constant import *
+from algorithm.constant import *
 from logger import Logger
 
 class OnPolicyBase(ABC):

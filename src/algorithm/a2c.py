@@ -4,8 +4,8 @@ import gym
 import math
 import numpy as np
 
-from on_policy.on_policy_base import OnPolicyBase
-from on_policy.constant import *
+from algorithm.on_policy_base import OnPolicyBase
+from algorithm.constant import *
 
 
 class A2C(OnPolicyBase):
